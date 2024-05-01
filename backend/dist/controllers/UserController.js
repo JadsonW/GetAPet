@@ -35,10 +35,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const jsonwebtoken_1 = require("jsonwebtoken");
 const Yup = __importStar(require("yup"));
 const bcrypt = __importStar(require("bcrypt"));
 //Model
 const User_1 = __importDefault(require("../database/Models/User"));
+//helpers
+const createToken_1 = __importDefault(require("../helpers/createToken"));
+const getToken_1 = __importDefault(require("../helpers/getToken"));
+const getUserByToken_1 = __importDefault(require("../helpers/getUserByToken"));
+const dotenv = __importStar(require("dotenv"));
+dotenv.config();
+const secret = process.env.SECRET;
 class UserController {
     createdUser(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -110,8 +118,7 @@ class UserController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { name, phone, email, password, confirmPassword } = req.body;
-                const id = req.params.id;
-                let image = '';
+                let image = "";
                 //Validação do formulario
                 const schema = Yup.object().shape({
                     name: Yup.string(),
@@ -124,12 +131,13 @@ class UserController {
                 if (req.file) {
                     image = req.file.filename;
                 }
+                console.log(req.file);
                 const userData = {
                     name: name,
                     phone: phone,
                     email: email,
                     password,
-                    image: image
+                    image: image,
                 };
                 if (password != confirmPassword) {
                     res.status(422).json({ error: "As senhas não conferem." });
@@ -140,7 +148,13 @@ class UserController {
                     const passwordHash = yield bcrypt.hash(password, salt);
                     userData.password = passwordHash;
                 }
-                yield User_1.default.update(userData, { where: { id: id } });
+                //pegando o usuario
+                const token = (0, getToken_1.default)(req, res);
+                const user = yield (0, getUserByToken_1.default)(token, res);
+                if (!user) {
+                    return res.status(422).json({ message: 'Acesso negado!' });
+                }
+                yield User_1.default.update(userData, { where: { id: user.id } });
                 res.status(200).json({ message: "Usuario editado", userData });
             }
             catch (error) {
@@ -174,6 +188,53 @@ class UserController {
     }
     login(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { email, password } = req.body;
+                const schema = Yup.object().shape({
+                    email: Yup.string().email().required("O email é obrigatorio"),
+                    password: Yup.string().required("a Senha é obrigatoria!"),
+                });
+                yield schema.validate(req.body, { abortEarly: true });
+                const user = yield User_1.default.findOne({ where: { email: email } });
+                if (!user) {
+                    return res.status(422).json({ message: "Usuario não cadastrado!" });
+                }
+                const checkPassword = yield bcrypt.compare(password, user.password);
+                if (!checkPassword) {
+                    return res.status(422).json({ message: "Senha incorreta" });
+                }
+                yield (0, createToken_1.default)(req, user, res);
+            }
+            catch (error) {
+                if (error.name === "ValidationError") {
+                    const yupErrors = error.inner.map((err) => ({
+                        field: err.path,
+                        message: err.message,
+                    }));
+                    return res
+                        .status(422)
+                        .json({ message: "Erro na validação", errors: yupErrors });
+                }
+                else {
+                    // Erro interno do servidor
+                    console.log(error);
+                    return res.status(500).json({ error: "Erro interno do servidor" });
+                }
+            }
+        });
+    }
+    checkUser(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let currentUser;
+            if (req.headers.authorization) {
+                const token = (0, getToken_1.default)(req, res);
+                const decoded = (0, jsonwebtoken_1.verify)(token, secret);
+                currentUser = yield User_1.default.findByPk(decoded.id);
+            }
+            else {
+                currentUser = null;
+            }
+            return res.status(200).send(currentUser);
         });
     }
 }

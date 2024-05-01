@@ -16,7 +16,7 @@ app.use('/user', UserRouter);
 const initialize = () => {
     try {
         app.listen(5000, () => console.log("Servidor rodando na porta 5000"));
-        User_1.default.sync({ force: true }).then(() => {
+        User_1.default.sync({ force: false }).then(() => {
             console.log("Tabela User sincronizada");
         });
     }
