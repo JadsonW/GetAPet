@@ -3,7 +3,13 @@ import conn from "../conn/conn";
 
 import Pet from "./Pet";
 
-class PetImage extends Model {
+interface petImageAttribute {
+  id?: number;
+  name?: string;
+  petId?: number;
+}
+
+class PetImage extends Model<petImageAttribute> {
   declare id: number;
   declare imageUrl: string;
 
@@ -21,7 +27,7 @@ PetImage.init(
       primaryKey: true,
       autoIncrement: true,
     },
-    imageUrl: {
+    name: {
       type: DataTypes.STRING,
       allowNull: false,
     },
@@ -37,4 +43,5 @@ PetImage.belongsTo(Pet, {
   as: "petImages",
 });
 
+export { petImageAttribute };
 export default PetImage;

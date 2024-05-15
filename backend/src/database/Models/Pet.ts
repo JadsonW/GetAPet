@@ -3,13 +3,25 @@ import conn from "../conn/conn";
 
 import User from "./User";
 
-class Pet extends Model {
+interface petAttributes {
+  id?: number;
+  name?: string;
+  age?: number;
+  weight?: number;
+  color?: string;
+  adopterID?: number;
+  userId?: number;
+  available?: boolean;
+}
+
+class Pet extends Model<petAttributes> {
   declare id: number;
   declare name: string;
   declare age: number;
   declare weight: number;
   declare color: string;
-  declare adopter: boolean;
+  declare adopterID: number;
+  declare available: boolean;
 
   declare userId: ForeignKey<User["id"]>;
 
@@ -41,7 +53,10 @@ Pet.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    adopter: {
+    adopterID: {
+      type: DataTypes.INTEGER,
+    },
+    available: {
       type: DataTypes.BOOLEAN,
     },
   },
@@ -53,7 +68,8 @@ Pet.init(
 
 Pet.belongsTo(User, {
   foreignKey: "userId",
-  as: 'petOwner'
+  as: "petOwner",
 });
 
+export { petAttributes };
 export default Pet;

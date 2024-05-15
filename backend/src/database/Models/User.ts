@@ -1,14 +1,22 @@
-import { DataTypes, ForeignKey, Model } from "sequelize";
+import { DataTypes, Model } from "sequelize";
 import conn from "../conn/conn";
 
-class User extends Model {
+interface userAttributes {
+  id?: number;
+  name?: string;
+  email?: string;
+  phone?: string;
+  password?: string;
+  image?: string;
+}
+
+class User extends Model<userAttributes> {
   declare id: number;
   declare name: string;
   declare phone: string;
   declare email: string;
   declare password: string;
   declare image: string;
-
 }
 
 User.init(
@@ -44,4 +52,5 @@ User.init(
   }
 );
 
+export { userAttributes };
 export default User;

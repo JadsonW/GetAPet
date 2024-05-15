@@ -88,13 +88,10 @@ class UserController {
             }
             catch (error) {
                 if (error.name === "ValidationError") {
-                    const yupErrors = error.inner.map((err) => ({
-                        field: err.path,
-                        message: err.message,
-                    }));
+                    const yupErrors = error.message;
                     return res
                         .status(422)
-                        .json({ message: "Erro na validação", errors: yupErrors });
+                        .json({ Error: error.message });
                 }
                 else {
                     // Erro interno do servidor
@@ -152,20 +149,15 @@ class UserController {
                 const token = (0, getToken_1.default)(req, res);
                 const user = yield (0, getUserByToken_1.default)(token, res);
                 if (!user) {
-                    return res.status(422).json({ message: 'Acesso negado!' });
+                    return res.status(422).json({ message: "Acesso negado!" });
                 }
                 yield User_1.default.update(userData, { where: { id: user.id } });
                 res.status(200).json({ message: "Usuario editado", userData });
             }
             catch (error) {
                 if (error.name === "ValidationError") {
-                    const yupErrors = error.inner.map((err) => ({
-                        field: err.path,
-                        message: err.message,
-                    }));
-                    return res
-                        .status(422)
-                        .json({ message: "Erro na validação", errors: yupErrors });
+                    const yupErrors = error.message;
+                    return res.status(422).json({ Error: error.message });
                 }
                 else {
                     // Erro interno do servidor
@@ -180,9 +172,9 @@ class UserController {
             const id = req.params.id;
             const user = yield User_1.default.findOne({ where: { id: id } });
             if (!user) {
-                res.status(422).json({ message: "Usuario não encontrado" });
+                return res.status(422).json({ message: "Usuario não encontrado" });
             }
-            yield (user === null || user === void 0 ? void 0 : user.destroy());
+            yield user.destroy();
             res.status(200).json({ message: "Usuario removido!" });
         });
     }

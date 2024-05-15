@@ -35,17 +35,18 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const sequelize_1 = require("sequelize");
 const dotenv = __importStar(require("dotenv"));
 dotenv.config();
-const dbName = process.env.DB_NAME;
+const secret = process.env.SECRET;
+const dbName = process.env.DB_MODEL;
 const dbUser = process.env.DB_USER;
 const dbPassword = process.env.DB_PASSWORD;
-const conn = new sequelize_1.Sequelize('get_a_pet', // nome do bd
-'root', // usuario do bd
-'', // senha do bd
+const dbHost = process.env.DB_HOST;
+const conn = new sequelize_1.Sequelize(dbName, // nome do bd
+dbUser, // usuario do bd
+dbPassword, // senha do bd
 {
-    host: 'localhost', // localizacao do bd
-    dialect: 'mysql' // tipo do bd
+    host: dbHost, // localizacao do bd
+    dialect: "mysql", // tipo do bd
 });
-console.log(dbName, '//////////////');
 () => __awaiter(void 0, void 0, void 0, function* () {
     try {
         yield conn.authenticate();

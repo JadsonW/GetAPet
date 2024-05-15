@@ -5,7 +5,7 @@ import * as Yup from "yup";
 import * as bcrypt from "bcrypt";
 
 //Model
-import User, { UserAttributes } from "../database/Models/User";
+import User, { userAttributes } from "../database/Models/User";
 
 //helpers
 import createToken from "../helpers/createToken";
@@ -50,7 +50,7 @@ class UserController {
       const salt = await bcrypt.genSalt(12);
       const passwordHash = await bcrypt.hash(password, salt);
 
-      const userData: UserAttributes = {
+      const userData: userAttributes = {
         name: name,
         phone: phone,
         email: email,
@@ -63,13 +63,10 @@ class UserController {
         .json({ message: "Usuario criado com suceso", user: userData });
     } catch (error: any) {
       if (error.name === "ValidationError") {
-        const yupErrors = error.inner.map((err: Yup.ValidationError) => ({
-          field: err.path,
-          message: err.message,
-        }));
+        const yupErrors = error.message;
         return res
           .status(422)
-          .json({ message: "Erro na validação", errors: yupErrors });
+          .json({ Error: error.message });
       } else {
         // Erro interno do servidor
         console.log(error);
@@ -111,7 +108,7 @@ class UserController {
       }
       console.log(req.file);
 
-      const userData: UserAttributes = {
+      const userData: userAttributes = {
         name: name,
         phone: phone,
         email: email,
@@ -131,8 +128,8 @@ class UserController {
       const token = getToken(req, res);
       const user = await getUserByToken(token, res);
 
-      if(!user) {
-        return res.status(422).json({message: 'Acesso negado!'})
+      if (!user) {
+        return res.status(422).json({ message: "Acesso negado!" });
       }
 
       await User.update(userData, { where: { id: user!.id } });
@@ -140,13 +137,8 @@ class UserController {
       res.status(200).json({ message: "Usuario editado", userData });
     } catch (error: any) {
       if (error.name === "ValidationError") {
-        const yupErrors = error.inner.map((err: Yup.ValidationError) => ({
-          field: err.path,
-          message: err.message,
-        }));
-        return res
-          .status(422)
-          .json({ message: "Erro na validação", errors: yupErrors });
+        const yupErrors = error.message;
+        return res.status(422).json({ Error: error.message });
       } else {
         // Erro interno do servidor
         console.log(error);
@@ -160,10 +152,10 @@ class UserController {
 
     const user = await User.findOne({ where: { id: id } });
     if (!user) {
-      res.status(422).json({ message: "Usuario não encontrado" });
+      return res.status(422).json({ message: "Usuario não encontrado" });
     }
 
-    await user?.destroy();
+    await user.destroy();
     res.status(200).json({ message: "Usuario removido!" });
   }
 

@@ -22,7 +22,6 @@ const getUserByToken = async (
   const userId = decoded.id;
 
   const user = await User.findByPk(userId);
-
   return user;
 };
 
