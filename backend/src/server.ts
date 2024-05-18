@@ -1,5 +1,6 @@
 import express from "express";
 import { Request, Response } from "express";
+import cors from "cors";
 
 //connection
 import conn from "./database/conn/conn";
@@ -15,10 +16,14 @@ import RequestVisit from "./database/Models/RequestVisit";
 import UsersRouter from "./Routes/UsersRoutes";
 import PetsRoutes from "./Routes/PetsRoutes";
 import RequestVisitRoutes from "./Routes/RequestVisitRoutes";
-import VisitRoutes from './Routes/VisitRoutes'
+import VisitRoutes from "./Routes/VisitRoutes";
 
 const app = express();
 app.use(express.json());
+
+app.use(cors({ credentials: true, origin: "http://localhost:3000" }));
+
+app.use(express.static("public"));
 
 app.get("/", (req: Request, res: Response) => {
   return res.send("eai emundo!");
@@ -27,7 +32,7 @@ app.get("/", (req: Request, res: Response) => {
 app.use("/user", UsersRouter);
 app.use("/pets", PetsRoutes);
 app.use("/request", RequestVisitRoutes);
-app.use("/schedule", VisitRoutes)
+app.use("/schedule", VisitRoutes);
 
 const initialize = () => {
   try {
