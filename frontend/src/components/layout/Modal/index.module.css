@@ -1,0 +1,41 @@
+
+.page {
+ width: 99.96%;
+ height: 142%;
+ background-color: rgba(128, 128, 128, 0.25);
+ position: absolute;
+ margin: -56.5% 0vw 0vw -2.5%;
+ transition: 2s;
+ z-index: 100;
+}
+
+.container {
+  padding: 3vh;
+  margin: 10vh auto;
+  background-color: white;
+  max-width: 45vw;
+  border-radius: 2em;
+  z-index: 1000;
+  animation: moveToBottom 800ms ease-in-out;
+}
+
+@keyframes moveToBottom {
+  100% {
+    transform: translateY(0%);
+  }
+  50% {
+    transform: translateY(10%);
+
+  }
+  0% {
+    transform: translateY(-100%);
+  }
+
+}
+
+.container h1 {
+  text-align: center;
+  font-weight: bold;
+  font-size: 2vw;
+  font-family: 'poppins';
+}

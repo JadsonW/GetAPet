@@ -14,6 +14,7 @@ router.get("/", PetController_1.default.getAll);
 router.get("/mypets", checkToken_1.default, PetController_1.default.getAllUserPets);
 router.post("/create", checkToken_1.default, imageUpload_1.default.array("images"), PetController_1.default.create);
 router.patch("/conclude", checkToken_1.default, PetController_1.default.adoptPet);
+router.get("/:id", PetController_1.default.getPetById);
 router.delete("/remove/:id", checkToken_1.default, PetController_1.default.remove);
 router.patch("/update/:id", checkToken_1.default, imageUpload_1.default.array("images"), PetController_1.default.update);
 exports.default = router;

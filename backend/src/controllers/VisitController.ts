@@ -87,11 +87,11 @@ class VisitController {
       return res.status(200).json({ message: "Visita marcada", visitCreate });
     } catch (error: any) {
       if (error.name === "ValidationError") {
-        return res.status(422).json({ Error: error.message });
+        return res.status(422).json({ message: error.message });
       } else {
         // Erro interno do servidor
         console.log(error);
-        return res.status(500).json({ error: "Erro interno do servidor" });
+        return res.status(500).json({ message: "Erro interno do servidor" });
       }
     }
   }

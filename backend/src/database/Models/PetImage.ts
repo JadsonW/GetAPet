@@ -7,11 +7,13 @@ interface petImageAttribute {
   id?: number;
   name?: string;
   petId?: number;
+  src?: string;
 }
 
 class PetImage extends Model<petImageAttribute> {
   declare id: number;
   declare imageUrl: string;
+  declare src: string;
 
   declare petId: ForeignKey<Pet["id"]>;
 
@@ -31,6 +33,9 @@ PetImage.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    src: {
+      type: DataTypes.STRING,
+    }
   },
   {
     sequelize: conn,

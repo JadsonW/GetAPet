@@ -17,17 +17,14 @@ import UsersRouter from "./Routes/UsersRoutes";
 import PetsRoutes from "./Routes/PetsRoutes";
 import RequestVisitRoutes from "./Routes/RequestVisitRoutes";
 import VisitRoutes from "./Routes/VisitRoutes";
+import path from "path";
 
 const app = express();
 app.use(express.json());
 
+app.use('/public', express.static(path.join(__dirname, 'public')));
 app.use(cors({ credentials: true, origin: "http://localhost:3000" }));
 
-app.use(express.static("public"));
-
-app.get("/", (req: Request, res: Response) => {
-  return res.send("eai emundo!");
-});
 
 app.use("/user", UsersRouter);
 app.use("/pets", PetsRoutes);

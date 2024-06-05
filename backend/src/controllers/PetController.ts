@@ -48,12 +48,12 @@ class PetController {
 
       if (req.files) {
         images = req.files;
-        images.map((image: any) => {
+        images.map(async (image: any) => {
           const petImageData: petImageAttribute = {
             name: image.filename,
             petId: petCreate.id,
           };
-          PetImage.create(petImageData);
+          await PetImage.create(petImageData);
         });
       }
 
@@ -63,11 +63,11 @@ class PetController {
     } catch (error: any) {
       if (error.name === "ValidationError") {
         const yupErrors = error.message;
-        return res.status(422).json({ Error: error.message });
+        return res.status(422).json({ message: error.message });
       } else {
         // Erro interno do servidor
         console.log(error);
-        return res.status(500).json({ error: "Erro interno do servidor" });
+        return res.status(500).json({ message: "Erro interno do servidor" });
       }
     }
   }
@@ -118,9 +118,9 @@ class PetController {
           .json({ message: "Faça login para completar a ação!" });
       }
 
-      const petSometimes = await Pet.findByPk(id);
+      const pet = await Pet.findByPk(id);
 
-      if (!petSometimes) {
+      if (!pet) {
         return res.status(422).json({ message: "Pet não encontrado" });
       }
 
@@ -131,40 +131,39 @@ class PetController {
         color: color,
       };
 
-      const petUpdate = await petSometimes.update(petData, {
+      const petUpdate = await pet.update(petData, {
         where: { id: id },
       });
+      console.log("------------<>", req.files);
 
       if (req.files) {
         images = req.files;
-        images.map((image: any) => {
+        images.map(async (image: any) => {
           const petImageData: petImageAttribute = {
             name: image.filename,
-            petId: id,
+            petId: petUpdate.id,
           };
-
-          PetImage.destroy({ where: { petId: id } });
-          PetImage.create(petImageData);
+          await PetImage.destroy({ where: { petId: id } });
+          await PetImage.create(petImageData);
         });
       }
-
       return res
         .status(200)
         .json({ message: "Pet editado com sucesso", petUpdate });
     } catch (error: any) {
       if (error.name === "ValidationError") {
         const yupErrors = error.message;
-        return res.status(422).json({ Error: error.message });
+        return res.status(422).json({ message: error.message });
       } else {
         // Erro interno do servidor
         console.log(error);
-        return res.status(500).json({ error: "Erro interno do servidor" });
+        return res.status(500).json({ message: "Erro interno do servidor" });
       }
     }
   }
 
   public async getPetById(req: Request, res: Response) {
-    const id = req.body.id;
+    const id = req.params.id;
 
     const pet = await Pet.findByPk(id);
 
@@ -172,17 +171,20 @@ class PetController {
       return res.status(422).json({ message: "Pet não cadastrado!" });
     }
 
-    return res.status(200).json({ pet });
+    const petImages = await PetImage.findAll({ where: { petId: pet.id } });
+
+    return res.status(200).json({ pet, petImages });
   }
 
   public async getAll(req: Request, res: Response) {
     const pets = await Pet.findAll();
+    const petsImage = await PetImage.findAll();
 
     if (!pets) {
       return res.status(422).json({ message: "Nenhum pet cadastrado" });
     }
 
-    return res.status(200).json({ pets });
+    return res.status(200).json({ pets, petsImage });
   }
 
   public async getAllUserPets(req: Request, res: Response) {
@@ -195,7 +197,14 @@ class PetController {
 
     const pets = await Pet.findAll({ where: { userId: user.id } });
 
-    return res.status(200).json({ pets });
+    const petImagesPromises = pets.map((pet) => {
+      return PetImage.findAll({ where: { petId: pet.id } });
+    });
+
+    const petImagesArrays  = await Promise.all(petImagesPromises);
+    const petImages = petImagesArrays.reduce((acc, curr) => acc.concat(curr), []);
+
+    return res.status(200).json({ pets, petImages });
   }
 
   public async getAllUserAdoptions(req: Request, res: Response) {
@@ -217,10 +226,10 @@ class PetController {
     const petId = req.body.petId;
     const adopterEmail = req.body.email;
 
-    const visit = await Visit.findOne({where: {petId: petId}})
+    const visit = await Visit.findOne({ where: { petId: petId } });
 
-    if(!visit) {
-      return
+    if (!visit) {
+      return;
     }
 
     const pet = await Pet.findByPk(petId);

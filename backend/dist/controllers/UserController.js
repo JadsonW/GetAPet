@@ -55,13 +55,13 @@ class UserController {
                 const { name, phone, email, password, confirmPassword } = req.body;
                 //Validação do formulario
                 const schema = Yup.object().shape({
-                    name: Yup.string().required("O nome é obrigatorio!"),
+                    confirmPassword: Yup.string().required("Confirme sua senha!"),
+                    password: Yup.string().required("A senha é obrigatoria!"),
                     email: Yup.string()
                         .email("Coloque um email valido!")
                         .required("O email é obrigatorio!"),
                     phone: Yup.string().required("O numero de telefone é obrigatorio!"),
-                    password: Yup.string().required("A senha é obrigatoria!"),
-                    confirmPassword: Yup.string().required("Confirme sua senha!"),
+                    name: Yup.string().required("O nome é obrigatorio!"),
                 });
                 yield schema.validate(req.body, { abortEarly: true });
                 //Verificando email
@@ -81,22 +81,18 @@ class UserController {
                     email: email,
                     password: passwordHash,
                 };
-                yield User_1.default.create(userData);
-                return res
-                    .status(201)
-                    .json({ message: "Usuario criado com suceso", user: userData });
+                const user = yield User_1.default.create(userData);
+                yield (0, createToken_1.default)(req, user, res);
             }
             catch (error) {
                 if (error.name === "ValidationError") {
                     const yupErrors = error.message;
-                    return res
-                        .status(422)
-                        .json({ Error: error.message });
+                    return res.status(422).json({ message: error.message });
                 }
                 else {
                     // Erro interno do servidor
                     console.log(error);
-                    return res.status(500).json({ error: "Erro interno do servidor" });
+                    return res.status(500).json({ message: "Erro interno do servidor" });
                 }
             }
         });
@@ -108,6 +104,7 @@ class UserController {
             if (!user) {
                 return res.status(422).json({ message: "Usuario não encontrado!" });
             }
+            user.password;
             return res.status(200).json({ user });
         });
     }
@@ -115,7 +112,7 @@ class UserController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { name, phone, email, password, confirmPassword } = req.body;
-                let image = "";
+                let image;
                 //Validação do formulario
                 const schema = Yup.object().shape({
                     name: Yup.string(),
@@ -128,7 +125,6 @@ class UserController {
                 if (req.file) {
                     image = req.file.filename;
                 }
-                console.log(req.file);
                 const userData = {
                     name: name,
                     phone: phone,
@@ -136,20 +132,22 @@ class UserController {
                     password,
                     image: image,
                 };
-                if (password != confirmPassword) {
-                    res.status(422).json({ error: "As senhas não conferem." });
-                }
-                else if (password === confirmPassword && password != null) {
-                    //Criptografando a senha
-                    const salt = yield bcrypt.genSalt(12);
-                    const passwordHash = yield bcrypt.hash(password, salt);
-                    userData.password = passwordHash;
+                if (password && confirmPassword) {
+                    if (password != confirmPassword) {
+                        res.status(422).json({ error: "As senhas não conferem." });
+                    }
+                    else if (password === confirmPassword && password != null) {
+                        //Criptografando a senha
+                        const salt = yield bcrypt.genSalt(12);
+                        const passwordHash = yield bcrypt.hash(password, salt);
+                        userData.password = passwordHash;
+                    }
                 }
                 //pegando o usuario
                 const token = (0, getToken_1.default)(req, res);
                 const user = yield (0, getUserByToken_1.default)(token, res);
                 if (!user) {
-                    return res.status(422).json({ message: "Acesso negado!" });
+                    return res.status(401).json({ message: "Acesso negado!" });
                 }
                 yield User_1.default.update(userData, { where: { id: user.id } });
                 res.status(200).json({ message: "Usuario editado", userData });
@@ -157,12 +155,12 @@ class UserController {
             catch (error) {
                 if (error.name === "ValidationError") {
                     const yupErrors = error.message;
-                    return res.status(422).json({ Error: error.message });
+                    return res.status(422).json({ message: error.message });
                 }
                 else {
                     // Erro interno do servidor
                     console.log(error);
-                    return res.status(500).json({ error: "Erro interno do servidor" });
+                    return res.status(500).json({ message: "Erro interno do servidor" });
                 }
             }
         });
@@ -183,8 +181,8 @@ class UserController {
             try {
                 const { email, password } = req.body;
                 const schema = Yup.object().shape({
-                    email: Yup.string().email().required("O email é obrigatorio"),
                     password: Yup.string().required("a Senha é obrigatoria!"),
+                    email: Yup.string().email().required("O email é obrigatorio"),
                 });
                 yield schema.validate(req.body, { abortEarly: true });
                 const user = yield User_1.default.findOne({ where: { email: email } });
@@ -199,18 +197,13 @@ class UserController {
             }
             catch (error) {
                 if (error.name === "ValidationError") {
-                    const yupErrors = error.inner.map((err) => ({
-                        field: err.path,
-                        message: err.message,
-                    }));
-                    return res
-                        .status(422)
-                        .json({ message: "Erro na validação", errors: yupErrors });
+                    const yupErrors = error.message;
+                    return res.status(422).json({ message: error.message });
                 }
                 else {
                     // Erro interno do servidor
                     console.log(error);
-                    return res.status(500).json({ error: "Erro interno do servidor" });
+                    return res.status(500).json({ message: "Erro interno do servidor" });
                 }
             }
         });

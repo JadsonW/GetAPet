@@ -18,6 +18,7 @@ router.post(
   PetController.create
 );
 router.patch("/conclude", checkToken, PetController.adoptPet);
+router.get("/:id", PetController.getPetById)
 router.delete("/remove/:id", checkToken, PetController.remove);
 router.patch(
   "/update/:id",

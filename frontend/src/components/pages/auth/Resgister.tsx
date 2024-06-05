@@ -19,7 +19,6 @@ function Register() {
   function handleSubmit(e: any) {
     e.preventDefault();
     register(user)
-    
   }
 
   return (

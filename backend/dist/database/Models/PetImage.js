@@ -18,6 +18,9 @@ PetImage.init({
         type: sequelize_1.DataTypes.STRING,
         allowNull: false,
     },
+    src: {
+        type: sequelize_1.DataTypes.STRING,
+    }
 }, {
     sequelize: conn_1.default,
     timestamps: true,

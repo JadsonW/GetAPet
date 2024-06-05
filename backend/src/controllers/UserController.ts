@@ -25,13 +25,13 @@ class UserController {
 
       //Validação do formulario
       const schema = Yup.object().shape({
-        name: Yup.string().required("O nome é obrigatorio!"),
+        confirmPassword: Yup.string().required("Confirme sua senha!"),
+        password: Yup.string().required("A senha é obrigatoria!"),
         email: Yup.string()
           .email("Coloque um email valido!")
           .required("O email é obrigatorio!"),
         phone: Yup.string().required("O numero de telefone é obrigatorio!"),
-        password: Yup.string().required("A senha é obrigatoria!"),
-        confirmPassword: Yup.string().required("Confirme sua senha!"),
+        name: Yup.string().required("O nome é obrigatorio!"),
       });
 
       await schema.validate(req.body, { abortEarly: true });
@@ -57,20 +57,16 @@ class UserController {
         password: passwordHash,
       };
 
-      await User.create(userData);
-      return res
-        .status(201)
-        .json({ message: "Usuario criado com suceso", user: userData });
+      const user = await User.create(userData);
+      await createToken(req, user, res);
     } catch (error: any) {
       if (error.name === "ValidationError") {
         const yupErrors = error.message;
-        return res
-          .status(422)
-          .json({ Error: error.message });
+        return res.status(422).json({ message: error.message });
       } else {
         // Erro interno do servidor
         console.log(error);
-        return res.status(500).json({ error: "Erro interno do servidor" });
+        return res.status(500).json({ message: "Erro interno do servidor" });
       }
     }
   }
@@ -83,14 +79,15 @@ class UserController {
       return res.status(422).json({ message: "Usuario não encontrado!" });
     }
 
+    user.password;
+
     return res.status(200).json({ user });
   }
 
   public async updatedUser(req: Request, res: Response) {
     try {
       const { name, phone, email, password, confirmPassword } = req.body;
-
-      let image = "";
+      let image: any;
 
       //Validação do formulario
       const schema = Yup.object().shape({
@@ -106,7 +103,6 @@ class UserController {
       if (req.file) {
         image = req.file.filename;
       }
-      console.log(req.file);
 
       const userData: userAttributes = {
         name: name,
@@ -116,33 +112,36 @@ class UserController {
         image: image,
       };
 
-      if (password != confirmPassword) {
-        res.status(422).json({ error: "As senhas não conferem." });
-      } else if (password === confirmPassword && password != null) {
-        //Criptografando a senha
-        const salt = await bcrypt.genSalt(12);
-        const passwordHash = await bcrypt.hash(password, salt);
-        userData.password = passwordHash;
+      if (password && confirmPassword) {
+        if (password != confirmPassword) {
+          res.status(422).json({ error: "As senhas não conferem." });
+        } else if (password === confirmPassword && password != null) {
+          //Criptografando a senha
+          const salt = await bcrypt.genSalt(12);
+          const passwordHash = await bcrypt.hash(password, salt);
+          userData.password = passwordHash;
+        }
       }
+
       //pegando o usuario
       const token = getToken(req, res);
       const user = await getUserByToken(token, res);
 
       if (!user) {
-        return res.status(422).json({ message: "Acesso negado!" });
+        return res.status(401).json({ message: "Acesso negado!" });
       }
 
-      await User.update(userData, { where: { id: user!.id } });
+      await User.update(userData, { where: { id: user.id } });
 
       res.status(200).json({ message: "Usuario editado", userData });
     } catch (error: any) {
       if (error.name === "ValidationError") {
         const yupErrors = error.message;
-        return res.status(422).json({ Error: error.message });
+        return res.status(422).json({ message: error.message });
       } else {
         // Erro interno do servidor
         console.log(error);
-        return res.status(500).json({ error: "Erro interno do servidor" });
+        return res.status(500).json({ message: "Erro interno do servidor" });
       }
     }
   }
@@ -164,8 +163,8 @@ class UserController {
       const { email, password } = req.body;
 
       const schema = Yup.object().shape({
-        email: Yup.string().email().required("O email é obrigatorio"),
         password: Yup.string().required("a Senha é obrigatoria!"),
+        email: Yup.string().email().required("O email é obrigatorio"),
       });
 
       await schema.validate(req.body, { abortEarly: true });
@@ -183,17 +182,12 @@ class UserController {
       await createToken(req, user, res);
     } catch (error: any) {
       if (error.name === "ValidationError") {
-        const yupErrors = error.inner.map((err: Yup.ValidationError) => ({
-          field: err.path,
-          message: err.message,
-        }));
-        return res
-          .status(422)
-          .json({ message: "Erro na validação", errors: yupErrors });
+        const yupErrors = error.message;
+        return res.status(422).json({ message: error.message });
       } else {
         // Erro interno do servidor
         console.log(error);
-        return res.status(500).json({ error: "Erro interno do servidor" });
+        return res.status(500).json({ message: "Erro interno do servidor" });
       }
     }
   }

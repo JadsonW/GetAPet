@@ -75,13 +75,13 @@ class PetController {
                 const petCreate = yield Pet_1.default.create(petData);
                 if (req.files) {
                     images = req.files;
-                    images.map((image) => {
+                    images.map((image) => __awaiter(this, void 0, void 0, function* () {
                         const petImageData = {
                             name: image.filename,
                             petId: petCreate.id,
                         };
-                        PetImage_1.default.create(petImageData);
-                    });
+                        yield PetImage_1.default.create(petImageData);
+                    }));
                 }
                 return res
                     .status(201)
@@ -90,12 +90,12 @@ class PetController {
             catch (error) {
                 if (error.name === "ValidationError") {
                     const yupErrors = error.message;
-                    return res.status(422).json({ Error: error.message });
+                    return res.status(422).json({ message: error.message });
                 }
                 else {
                     // Erro interno do servidor
                     console.log(error);
-                    return res.status(500).json({ error: "Erro interno do servidor" });
+                    return res.status(500).json({ message: "Erro interno do servidor" });
                 }
             }
         });
@@ -137,8 +137,8 @@ class PetController {
                         .status(422)
                         .json({ message: "Faça login para completar a ação!" });
                 }
-                const petSometimes = yield Pet_1.default.findByPk(id);
-                if (!petSometimes) {
+                const pet = yield Pet_1.default.findByPk(id);
+                if (!pet) {
                     return res.status(422).json({ message: "Pet não encontrado" });
                 }
                 const petData = {
@@ -147,19 +147,20 @@ class PetController {
                     weight: weight,
                     color: color,
                 };
-                const petUpdate = yield petSometimes.update(petData, {
+                const petUpdate = yield pet.update(petData, {
                     where: { id: id },
                 });
+                console.log("------------<>", req.files);
                 if (req.files) {
                     images = req.files;
-                    images.map((image) => {
+                    images.map((image) => __awaiter(this, void 0, void 0, function* () {
                         const petImageData = {
                             name: image.filename,
-                            petId: id,
+                            petId: petUpdate.id,
                         };
-                        PetImage_1.default.destroy({ where: { petId: id } });
-                        PetImage_1.default.create(petImageData);
-                    });
+                        yield PetImage_1.default.destroy({ where: { petId: id } });
+                        yield PetImage_1.default.create(petImageData);
+                    }));
                 }
                 return res
                     .status(200)
@@ -168,33 +169,35 @@ class PetController {
             catch (error) {
                 if (error.name === "ValidationError") {
                     const yupErrors = error.message;
-                    return res.status(422).json({ Error: error.message });
+                    return res.status(422).json({ message: error.message });
                 }
                 else {
                     // Erro interno do servidor
                     console.log(error);
-                    return res.status(500).json({ error: "Erro interno do servidor" });
+                    return res.status(500).json({ message: "Erro interno do servidor" });
                 }
             }
         });
     }
     getPetById(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
-            const id = req.body.id;
+            const id = req.params.id;
             const pet = yield Pet_1.default.findByPk(id);
             if (!pet) {
                 return res.status(422).json({ message: "Pet não cadastrado!" });
             }
-            return res.status(200).json({ pet });
+            const petImages = yield PetImage_1.default.findAll({ where: { petId: pet.id } });
+            return res.status(200).json({ pet, petImages });
         });
     }
     getAll(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             const pets = yield Pet_1.default.findAll();
+            const petsImage = yield PetImage_1.default.findAll();
             if (!pets) {
                 return res.status(422).json({ message: "Nenhum pet cadastrado" });
             }
-            return res.status(200).json({ pets });
+            return res.status(200).json({ pets, petsImage });
         });
     }
     getAllUserPets(req, res) {
@@ -205,7 +208,12 @@ class PetController {
                 return res.status(401).json({ message: "Acesso negado!" });
             }
             const pets = yield Pet_1.default.findAll({ where: { userId: user.id } });
-            return res.status(200).json({ pets });
+            const petImagesPromises = pets.map((pet) => {
+                return PetImage_1.default.findAll({ where: { petId: pet.id } });
+            });
+            const petImagesArrays = yield Promise.all(petImagesPromises);
+            const petImages = petImagesArrays.reduce((acc, curr) => acc.concat(curr), []);
+            return res.status(200).json({ pets, petImages });
         });
     }
     getAllUserAdoptions(req, res) {

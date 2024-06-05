@@ -1,12 +1,11 @@
 * {
   padding: 0;
   margin: 0;
-  font-family: Helvetica;
+  font-family: "poppins";
   box-sizing: border-box;
 }
 
 h1 {
-  margin-bottom: 1em;
   font-size: 2.1em;
 }
 
