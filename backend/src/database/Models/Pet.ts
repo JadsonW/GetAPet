@@ -9,17 +9,21 @@ interface petAttributes {
   age?: number;
   weight?: number;
   color?: string;
+  type?: string;
   adopterID?: number;
   userId?: number;
   available?: boolean;
 }
 
+//Adicionar o tipo do pet
+
 class Pet extends Model<petAttributes> {
   declare id: number;
   declare name: string;
-  declare age: number;
-  declare weight: number;
+  declare age: string;
+  declare weight: string;
   declare color: string;
+  declare type: string;
   declare adopterID: number;
   declare available: boolean;
 
@@ -42,14 +46,18 @@ Pet.init(
       allowNull: false,
     },
     age: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING,
       allowNull: false,
     },
     weight: {
-      type: DataTypes.DOUBLE,
+      type: DataTypes.STRING,
       allowNull: false,
     },
     color: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    type: {
       type: DataTypes.STRING,
       allowNull: false,
     },

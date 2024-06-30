@@ -48,9 +48,10 @@ class PetController {
     create(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { name, age, weight, color } = req.body;
+                const { name, age, weight, color, type } = req.body;
                 let images;
                 const schema = Yup.object().shape({
+                    type: Yup.string().required("Digite o tipo do pet!"),
                     color: Yup.string().required("A cor do pet é obrigatoria!"),
                     weight: Yup.number().required("O peso do pet é obrigatorio!"),
                     age: Yup.number().required("A idade do pet é obrigatoria"),
@@ -69,6 +70,7 @@ class PetController {
                     age: age,
                     weight: weight,
                     color: color,
+                    type: type,
                     available: true,
                     userId: user.id,
                 };
@@ -83,6 +85,7 @@ class PetController {
                         yield PetImage_1.default.create(petImageData);
                     }));
                 }
+                console.log("Imagens: ", req.files);
                 return res
                     .status(201)
                     .json({ message: "Usuario criado com sucesso!", petCreate });
@@ -109,9 +112,9 @@ class PetController {
             }
             const petImages = yield PetImage_1.default.findAll({ where: { petId: pet.id } });
             if (petImages) {
-                petImages.map((Petimage) => {
+                yield Promise.all(petImages.map((Petimage) => {
                     Petimage.destroy();
-                });
+                }));
             }
             pet.destroy();
             return res.status(200).json({ message: "Usuario deletado com sucesso!" });
@@ -205,7 +208,7 @@ class PetController {
             const token = (0, getToken_1.default)(req, res);
             const user = yield (0, getUserByToken_1.default)(token, res);
             if (!user) {
-                return res.status(401).json({ message: "Acesso negado!" });
+                return res.status(401).json({ message: "Acesso negado djabo!" });
             }
             const pets = yield Pet_1.default.findAll({ where: { userId: user.id } });
             const petImagesPromises = pets.map((pet) => {

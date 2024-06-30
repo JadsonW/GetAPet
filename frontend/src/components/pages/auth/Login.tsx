@@ -1,6 +1,6 @@
 import { useContext, useState } from "react";
 
-import { Context } from "../../../context/UserContext";
+import { Context } from "../../../context/functionsContext";
 
 import Input from "../../form/Input/Input";
 import { Link } from "react-router-dom";

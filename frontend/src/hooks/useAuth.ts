@@ -17,14 +17,14 @@ export default function useAuth() {
   const token = localStorage.getItem("token");
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-
-    if (token) {
-      const parsedToken = JSON.parse(token);
-      api.defaults.headers.Authorization = `Bearer ${parsedToken}`;
+    if (!token) {
+      console.log("Usuario não está logado");
+    } else {
+      api.defaults.headers.Authorization = `Bearer ${JSON.parse(token)}`;
       setAuthenticated(true);
+      console.log("Usuario logado");
     }
-  }, []);
+  }, [token]);
 
   async function register(user: User) {
     let msgText = "Cadastro realizado com sucesso!";
@@ -34,7 +34,7 @@ export default function useAuth() {
         return response.data;
       });
 
-      await authUser(data.token);
+      await authUser(data);
     } catch (error: any) {
       msgText = error.response.data.message;
       msgType = "error";
@@ -51,11 +51,6 @@ export default function useAuth() {
     localStorage.removeItem("token");
     api.defaults.headers.Authorization = undefined!;
 
-    console.log(
-      authenticated,
-      "----------------------",
-      localStorage.getItem("token")
-    );
     navigate("/");
 
     setFlashMessage({ msg: msgText, type: msgType });
@@ -82,6 +77,7 @@ export default function useAuth() {
   async function authUser(data: any) {
     setAuthenticated(true);
     localStorage.setItem("token", JSON.stringify(data.token));
+
     navigate("/");
   }
 
@@ -89,7 +85,7 @@ export default function useAuth() {
     const token = localStorage.getItem("token");
     try {
       if (!token) {
-        return undefined;
+        return;
       }
       const data = await api
         .get(`/user/checkuser`, {
@@ -106,6 +102,23 @@ export default function useAuth() {
         const img = `${process.env.REACT_APP_API}public/images/users/${image}`;
         data.image = img;
       }
+      return data;
+    } catch (error) {
+      console.log("O erro é no getUser:", error);
+    }
+  }
+
+  async function getUserById(id: string) {
+    try {
+      const data = await api.get(`/user/${id}`).then((response) => {
+        return response.data;
+      });
+
+      let image = data.image;
+      if (image) {
+        const img = `${process.env.REACT_APP_API}public/images/users/${image}`;
+        data.image = img;
+      }
 
       return data;
     } catch (error) {
@@ -116,7 +129,7 @@ export default function useAuth() {
   async function updateUser(user: any) {
     const token = localStorage.getItem("token");
 
-    let msgText = "Usuari editado com sucesso!";
+    let msgText = "Usuario editado com sucesso!";
     let msgType = "success";
     try {
       console.log(user);
@@ -163,16 +176,26 @@ export default function useAuth() {
         return response.data;
       });
 
+      const userOwner = await api
+        .get(`user/${data.pet.userId}`)
+        .then((response) => {
+          return response.data;
+        });
+
       const images = data.petImages;
 
       if (images) {
-        images.map((image: any) => {
+        images.forEach((image: any) => {
           const imgRoute = `${process.env.REACT_APP_API}public/images/pets/${image.name}`;
           image.src = imgRoute;
         });
       }
 
-      return data;
+      return {
+        pet: data.pet,
+        petImages: data.petImages,
+        owner: userOwner,
+      };
     } catch (error) {
       console.log(error);
     }
@@ -190,20 +213,236 @@ export default function useAuth() {
           return response.data;
         });
 
-        const images = data.petImages;
+      const images = data.petImages;
 
-        if (images) {
-          images.map((image: any) => {
-            console.log(image.name)
-            const imgRoute = `${process.env.REACT_APP_API}public/images/pets/${image.name}`;
-            image.src = imgRoute;
-          });
-        }
+      if (images) {
+        images.map((image: any) => {
+          const imgRoute = `${process.env.REACT_APP_API}public/images/pets/${image.name}`;
+          image.src = imgRoute;
+        });
+      }
 
-        return data
+      return data;
     } catch (error) {
       console.log(error);
     }
+  }
+
+  async function createdPet(Pet: any) {
+    let msgText = "Pet criado com sucesso";
+    let msgType = "sucess";
+    try {
+      const data = await api
+        .post("/pets/create", Pet, {
+          headers: {
+            Authorization: `Bearer ${JSON.parse(token!)}`,
+            "Content-Type": "multipart/form-data",
+          },
+        })
+        .then((response) => {
+          return response.data;
+        });
+
+      return data.petCreate;
+    } catch (error: any) {
+      msgText = error.response.data.message;
+      msgType = "error";
+      console.error(error);
+    }
+    setFlashMessage({ msg: msgText, type: msgType });
+  }
+
+  async function deletePet(id: string) {
+    let msgText = "Pet deletado com sucesso!";
+    let msgType = "success";
+    try {
+      const data = await api
+        .delete(`/pets/remove/${id}`, {
+          headers: {
+            Authorization: `Bearer ${JSON.parse(token!)}`,
+          },
+        })
+        .then((response) => {
+          return response.data;
+        });
+      return data;
+    } catch (error: any) {
+      msgText = error.response.data.message;
+      msgType = "error";
+      console.log(error);
+    }
+    setFlashMessage({ msg: msgText, type: msgType });
+  }
+
+  async function editPet(Pet: any, id: string) {
+    let msgText = "Pet editado com sucesso!";
+    let msgType = "success";
+    try {
+      await api.patch(`pets/update/${id}`, Pet, {
+        headers: {
+          Authorization: `Bearer ${JSON.parse(token!)}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+    } catch (error: any) {
+      msgText = error.response.data.message;
+      msgType = "error";
+      console.log(error);
+    }
+    setFlashMessage({ msg: msgText, type: msgType });
+  }
+
+  async function reqVisit(id: string) {
+    let msgType = "success";
+    try {
+      const data = await api.post(`/request/create/${id}`).then((response) => {
+        return response.data;
+      });
+
+      setFlashMessage({ msg: data.message, type: msgType });
+      return data;
+    } catch (error: any) {
+      console.log(error);
+      let msg = error.response.data.message;
+      msgType = "error";
+      setFlashMessage({ msg: msg, type: msgType });
+    }
+  }
+
+  async function getAllReqVisitsByPet(id: string) {
+    try {
+      const data = await api.get(`/request/allReqs/${id}`).then((Response) => {
+        return Response.data;
+      });
+
+      return data.reqs;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async function deleteReqVisit(id: string) {
+    try {
+      const data = await api
+        .delete(`/request/delete/${id}`)
+        .then((response) => {
+          return response.data;
+        });
+
+      return data;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async function scheduleVisit(id: string, dataForm: any) {
+    let msgType;
+    let msgText;
+    try {
+      const data = await api
+        .post(`/schedule/create/${id}`, dataForm)
+        .then((response) => {
+          return response.data;
+        });
+      msgType = "success";
+      msgText = data.message;
+    } catch (error: any) {
+      msgText = error.response.data.message;
+      msgType = "error";
+    }
+    setFlashMessage({ msg: msgText, type: msgType });
+  }
+
+  async function getAllVisitsByUser(id: string) {
+    try {
+      const data = await api
+        .get(`/schedule/myvisits/${id}`, {
+          headers: {
+            Authorization: `Bearer ${JSON.parse(token!)}`,
+            "Content-Type": "multipart/form-data",
+          },
+        })
+        .then((response) => {
+          return response.data;
+        });
+
+      const visits = data.visits;
+
+      visits.forEach(async (visit: any) => {
+        const adopter = await getUserById(visit.adopterId);
+        const pet = await getPet(visit.petId);
+        visit.adopter = adopter;
+        visit.pet = pet;
+      });
+
+      return data.visits;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async function getAllVisitsByPet(id: string) {
+    try {
+      const data = await api
+        .get(`/schedule/petvisits/${id}`)
+        .then((response) => {
+          return response.data;
+        });
+
+      const visits = data.visits;
+
+      visits.forEach(async (visit: any) => {
+        const adopter = await getUserById(visit.adopterId);
+        const pet = await getPet(visit.petId);
+        visit.adopter = adopter;
+        visit.pet = pet;
+      });
+
+      return data.visits;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async function concludeAdoption(id: string, email: string) {
+    let msgType = "success";
+    let msgText;
+    console.log('------->: ', email);
+  
+    try {
+      const data = await api
+        .patch(`/pets/conclude/${id}`, email)
+        .then((response) => {
+          return response.data;
+        });
+  
+      msgText = data.message;
+    } catch (error: any) {
+      console.log(error);
+      msgText = error.response.data.message;
+      msgType = "error";
+    }
+    setFlashMessage({ msg: msgText, type: msgType });
+  }
+  
+  async function cancelVisit(id: string) {
+    let msgText = "";
+    let msgType = "success";
+
+    try {
+      const data = await api
+        .patch(`/schedule/disconfirm/${id}`)
+        .then((response) => {
+          return response.data;
+        });
+      msgText = data.message;
+      return data;
+    } catch (error: any) {
+      msgText = error.response.data.message;
+      msgType = "error";
+      console.log("Error no ngc aqi", error);
+    }
+    setFlashMessage({ msg: msgText, type: msgType });
   }
 
   return {
@@ -212,9 +451,21 @@ export default function useAuth() {
     login,
     logout,
     getUser,
+    getUserById,
     getAllPets,
     getPet,
     updateUser,
-    getPetByUser
+    getPetByUser,
+    createdPet,
+    deletePet,
+    editPet,
+    reqVisit,
+    getAllReqVisitsByPet,
+    deleteReqVisit,
+    scheduleVisit,
+    getAllVisitsByUser,
+    getAllVisitsByPet,
+    cancelVisit,
+    concludeAdoption,
   };
 }

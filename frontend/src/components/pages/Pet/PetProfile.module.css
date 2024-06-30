@@ -1,0 +1,296 @@
+.header {
+  display: flex;
+  align-items: center;
+  border-bottom: 3px solid #f29c1f;
+  text-align: center;
+  padding-bottom: 4vh;
+  margin-bottom: 2vh;
+}
+
+.images {
+  display: flex;
+  align-items: center;
+  gap: 1vw;
+  max-width: 20vw;
+  overflow-x: auto;
+}
+
+.images::-webkit-scrollbar {
+  height: 10px;
+}
+
+/* Estilo para o polegar da barra de rolagem */
+.images::-webkit-scrollbar-thumb {
+  background-color: #999999;
+  border-radius: 4px;
+  background-clip: content-box;
+  cursor: pointer;
+}
+
+/* Estilo para o trilho da barra de rolagem */
+.images::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+.info {
+  display: flex;
+  align-items: normal!important;
+  flex-direction: column;
+  margin-left: 5vw;
+  border-left: 3px solid #f29c1f;
+  padding-left: 10vw;
+  text-align: start;
+}
+
+.bodyInfo {
+  width: 40vw;
+  display: flex;
+  align-items: normal!important;
+  flex-direction: column;
+  gap: 1vh;
+}
+
+.bodyInfo span{
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.container_main {
+  display: flex;
+  justify-content: space-between;
+  list-style-type: none;
+}
+
+.bodyVisits {
+  background-color: #999999;
+  min-width: 35vw;
+  height: 42vh;
+  padding: 1em;
+  border-radius: 1em;
+  margin-top: 1vh;
+}
+
+.containerCard {
+  border: 1px solid #f29c1f;
+  border-radius: 0.7em;
+  padding: 0.5em 1em 1em;
+  margin-bottom: 1.5vh;
+  max-height: 100%;
+  overflow-y: auto;
+}
+
+.containerCard::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Estilo para o polegar da barra de rolagem */
+.containerCard::-webkit-scrollbar-thumb {
+  background-color: #f29c1f;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* Estilo para o trilho da barra de rolagem */
+.containerCard::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+.containerCard span {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.containerCard span + span {
+  margin-top: 1vh;
+}
+
+.buttonGroup {
+  gap: 0.7em;
+}
+
+.button {
+  border-radius: 8px;
+  background-color: #25b456;
+  color: white;
+  border: none;
+  min-height: 2.5em;
+  padding: 0.5em 1em;
+  cursor: pointer;
+  font-size: 1em;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+.button:hover {
+  background-color: #1c8a42;
+}
+
+.butt {
+  border-radius: 8px;
+  background-color: #25b456;
+  color: white;
+  border: none;
+  min-height: 2.5em;
+  padding: 0.5em 1em;
+  cursor: pointer;
+  font-size: 1em;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+.butt:hover {
+  background-color: #1c8a42;
+}
+
+.butt a {
+  text-decoration: none;
+  color: white;
+}
+
+.buttonCLose {
+  border-radius: 8px;
+  background-color: #000000;
+  color: white;
+  border: none;
+  min-width: 10vw;
+  min-height: 2.5em;
+  width: 10%;
+  cursor: pointer;
+  font-size: 1.1em;
+  font-weight: bold;
+  transition: 0.5s;
+  margin-left: 2%;
+}
+
+.buttonCLose:hover {
+  background-color: #535353;
+}
+
+.buttonPet {
+  color: white;
+  border: none;
+  cursor: pointer;
+  padding: 0.4em;
+  border-radius: 0.3em;
+  min-height: 1em;
+  font-size: 0.9em;
+  transition: 0.5s;
+}
+
+.esc {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  color: red;
+  font-size: 1.6em;
+}
+
+.esc:hover {
+  color: rgb(193, 2, 2);
+}
+
+.confirm {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  color: #25b456;
+  font-size: 1.6em;
+}
+
+.confirm:hover {
+  color: #18d35a;
+}
+
+.reqVisit + .reqVisit {
+  margin-top: 2vh;
+}
+
+.container_reqVisit {
+  display: flex;
+  align-items: center;
+  gap: 6vw;
+  border-bottom: 1px solid #f29c1f;
+}
+
+.container_reqVisit div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.reqVisit div a {
+  text-decoration: none;
+  color: rgb(207, 206, 206);
+  font-size: 0.9em;
+  transition: 0.2s;
+}
+
+.reqVisit div a:hover {
+  color: white;
+}
+
+.reqVisit span {
+  display: flex;
+  align-items: center;
+  gap: 3vw;
+}
+
+.reqVisit input[type="button"] {
+  background-color: #25b456;
+  border: 0;
+  color: #fff;
+  padding: 0.5em;
+  border-radius: 0.5em;
+}
+
+
+.visitaPet {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 1.5%;
+  border-bottom: 2px solid #f29c1f;
+
+}
+.visitaPet .visitaPetPerfil {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.visitaPet .buttonGroupVisit {
+  display: flex;
+  gap: 0.5em!important;
+}
+
+.buttonCLose:hover {
+  background-color: #535353;
+}
+
+.buttonPet {
+  border: none;
+  cursor: pointer;
+  padding: 0.4em;
+  border-radius: 0.3em;
+  min-height: 1em;
+  font-size: 0.9em;
+  transition: 0.5s;
+}
+
+.vizualize {
+  background-color: transparent;
+
+}
+
+.vizualize:hover {
+  border: 1px solid #f29c1f;
+}
+
+.exclude {
+  background-color: rgb(218, 67, 67);
+}
+
+.exclude:hover {
+  background-color: rgb(153, 44, 44);
+}

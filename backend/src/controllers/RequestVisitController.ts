@@ -65,32 +65,25 @@ class RequestVisitController {
     return res.status(200).json({ message: "Solicitação deletada!" });
   }
 
-  public async getAllReqVisit(req: Request, res: Response) {
+  public async getAllReqVisitById(req: Request, res: Response) {
     const token = await getToken(req, res);
     const user = await getUserByToken(token, res);
+
+
+    const id = req.params.id;
 
     if (!user) {
       return;
     }
 
     //buscando todas as requisições de visitas
-    const reqs = await RequestVisit.findAll();
+    const reqs = await RequestVisit.findAll({ where: { petId: id } });
 
     if (!reqs) {
       return res.json({ message: "Nenhuma solicitação de adoção encontrada" });
     }
 
-    let reqsOwner: Array<Object> = [];
-
-    //verificando se existe alguma visita para o usuario logado
-    for (const req of reqs) {
-      const pet = await Pet.findOne({ where: { id: req.petId } });
-      if (pet && pet.userId === user.id) {
-        reqsOwner.push(req);
-      }
-    }
-
-    return res.status(200).json({ reqsOwner });
+    return res.status(200).json({ reqs });
   }
 }
 

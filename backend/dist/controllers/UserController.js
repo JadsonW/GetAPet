@@ -105,7 +105,7 @@ class UserController {
                 return res.status(422).json({ message: "Usuario não encontrado!" });
             }
             user.password;
-            return res.status(200).json({ user });
+            return res.status(200).json(user);
         });
     }
     updatedUser(req, res) {

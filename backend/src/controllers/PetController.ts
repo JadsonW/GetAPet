@@ -11,17 +11,19 @@ import PetImage, { petImageAttribute } from "../database/Models/PetImage";
 import getUserByToken from "../helpers/getUserByToken";
 import getToken from "../helpers/getToken";
 import Visit from "../database/Models/Visit";
+import { where } from "sequelize";
 
 class PetController {
   public async create(req: Request, res: Response) {
     try {
-      const { name, age, weight, color } = req.body;
+      const { name, age, weight, color, type } = req.body;
       let images: any;
 
       const schema = Yup.object().shape({
+        type: Yup.string().required("Digite o tipo do pet!"),
         color: Yup.string().required("A cor do pet é obrigatoria!"),
-        weight: Yup.number().required("O peso do pet é obrigatorio!"),
-        age: Yup.number().required("A idade do pet é obrigatoria"),
+        weight: Yup.string().required("O peso do pet é obrigatorio!"),
+        age: Yup.string().required("A idade do pet é obrigatoria"),
         name: Yup.string().required("O nome do pet é obrigatorio!"),
       });
 
@@ -40,6 +42,7 @@ class PetController {
         age: age,
         weight: weight,
         color: color,
+        type: type,
         available: true,
         userId: user.id,
       };
@@ -48,7 +51,7 @@ class PetController {
 
       if (req.files) {
         images = req.files;
-        images.map(async (image: any) => {
+        images.forEach(async (image: any) => {
           const petImageData: petImageAttribute = {
             name: image.filename,
             petId: petCreate.id,
@@ -59,7 +62,7 @@ class PetController {
 
       return res
         .status(201)
-        .json({ message: "Usuario criado com sucesso!", petCreate });
+        .json({ petCreate });
     } catch (error: any) {
       if (error.name === "ValidationError") {
         const yupErrors = error.message;
@@ -76,17 +79,27 @@ class PetController {
     const id = req.params.id;
 
     const pet = await Pet.findByPk(id);
-
+    
     if (!pet) {
       return res.status(422).json({ message: "Pet não encontrado!" });
+      }
+
+    const visits = await Visit.findAll({where: {petId: pet.id}})
+
+    if(visits) {
+      visits.forEach((visit) => {
+        visit.destroy()
+      })
     }
 
     const petImages = await PetImage.findAll({ where: { petId: pet.id } });
 
     if (petImages) {
-      petImages.map((Petimage) => {
-        Petimage.destroy();
-      });
+      await Promise.all(
+        petImages.map((Petimage) => {
+          Petimage.destroy();
+        })
+      );
     }
 
     pet.destroy();
@@ -102,8 +115,8 @@ class PetController {
 
       const schema = Yup.object().shape({
         color: Yup.string(),
-        weight: Yup.number(),
-        age: Yup.number(),
+        weight: Yup.string(),
+        age: Yup.string(),
         name: Yup.string(),
       });
 
@@ -166,7 +179,7 @@ class PetController {
     const id = req.params.id;
 
     const pet = await Pet.findByPk(id);
-
+    
     if (!pet) {
       return res.status(422).json({ message: "Pet não cadastrado!" });
     }
@@ -192,17 +205,20 @@ class PetController {
     const user = await getUserByToken(token, res);
 
     if (!user) {
-      return res.status(401).json({ message: "Acesso negado!" });
+      return res.status(401).json({ message: "Acesso negado djabo!" });
     }
 
-    const pets = await Pet.findAll({ where: { userId: user.id } });
+    const pets = await Pet.findAll({ where: { userId: user.id, available: true } });
 
     const petImagesPromises = pets.map((pet) => {
       return PetImage.findAll({ where: { petId: pet.id } });
     });
 
-    const petImagesArrays  = await Promise.all(petImagesPromises);
-    const petImages = petImagesArrays.reduce((acc, curr) => acc.concat(curr), []);
+    const petImagesArrays = await Promise.all(petImagesPromises);
+    const petImages = petImagesArrays.reduce(
+      (acc, curr) => acc.concat(curr),
+      []
+    );
 
     return res.status(200).json({ pets, petImages });
   }
@@ -223,10 +239,11 @@ class PetController {
   }
 
   public async adoptPet(req: Request, res: Response) {
-    const petId = req.body.petId;
+    console.log('============> body: ', req.body)
+    const petId = req.params.petId;
     const adopterEmail = req.body.email;
 
-    const visit = await Visit.findOne({ where: { petId: petId } });
+    const visits = await Visit.findAll({ where: { petId: petId } });
 
     if (!visit) {
       return;
@@ -256,6 +273,9 @@ class PetController {
     };
 
     await pet.update(petData);
+    visits.forEach((visit) => {
+      visit.destroy()
+    })
 
     return res
       .status(200)

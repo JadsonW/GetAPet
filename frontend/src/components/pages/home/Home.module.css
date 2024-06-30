@@ -26,24 +26,24 @@
   gap: 1vh;
 }
 
-span button {
+.main_card_pt button {
   cursor: pointer;
   background-color: #25b456;
   color: white;
   border: none;
   font-weight: bold;
-  width: 80%;
   height: 5vh;
   border-radius: .4em;
   font-size: 1em;
+  padding: 0 .5em 0 .5em;
   transition: 0.3s;
 }
 
-span button a {
+.main_card_pt button a {
   text-decoration: none!important;
   color: #fff;
 }
 
-span button:hover {
+.main_card_pt button:hover {
   background-color: #1c8a42;
 }

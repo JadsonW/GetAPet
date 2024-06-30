@@ -10,18 +10,26 @@ interface props {
   multiple?: any;
 }
 
-function Input(props: props) {
+function Input({
+  text,
+  name,
+  type,
+  placeholder,
+  handleOnChange,
+  value,
+  multiple,
+}: props) {
   return (
     <div className={styles.form_control}>
-      <label htmlFor={props.name}>{props.text}: </label>
+      <label htmlFor={name}>{text}: </label>
       <input
-        type={props.type}
-        name={props.name}
-        id={props.name}
-        placeholder={props.placeholder}
-        onChange={props.handleOnChange}
-        value={props.value}
-        {...(props.multiple ? props.multiple : "")}
+        type={type}
+        name={name}
+        id={name}
+        placeholder={placeholder}
+        onChange={handleOnChange}
+        value={value}
+        {...(multiple ? { multiple } : "")}
       />
     </div>
   );

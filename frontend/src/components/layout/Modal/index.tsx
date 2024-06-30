@@ -5,9 +5,10 @@ import styles from "./index.module.css";
 interface modalProps {
   children: React.ReactNode;
   visible: boolean;
+  title: string;
 }
 
-function Modal({ children, visible }: modalProps) {
+function Modal({ children, visible, title }: modalProps) {
   useEffect(() => {
     if (!visible) return undefined;
   }, [visible]);
@@ -15,7 +16,7 @@ function Modal({ children, visible }: modalProps) {
   return (
     <div className={`${styles.page}`}>
       <div className={styles.container}>
-        <h1>Editar</h1>
+        <h1>{title}</h1>
         {children}
       </div>
     </div>

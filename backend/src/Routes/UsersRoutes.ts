@@ -12,7 +12,7 @@ import imageUpload from "../helpers/imageUpload";
 //Rotas
 router.post("/create", UserController.createdUser);
 router.get("/checkuser", checkToken, UserController.checkUser)
-router.get("/:id", checkToken, UserController.getUserById);
+router.get("/:id", UserController.getUserById);
 router.delete("/remove/:id", checkToken, UserController.removeUser);
 router.post("/login", UserController.login);
 router.patch(

@@ -6,8 +6,9 @@ import checkToken from "../helpers/checkToken";
 
 const router = Router();
 
-router.get("/myvisits", checkToken, VisitController.getVisitByUser)
+router.get("/petvisits/:id", checkToken, VisitController.getVisitByPet)
+router.get("/myvisits/:id", checkToken, VisitController.getVisitByUser)
 router.post("/create/:reqid", checkToken, VisitController.createVisit);
-router.patch("/disconfirm/:id", checkToken, VisitController.disconfirm);
+router.patch("/disconfirm/:idVisit", checkToken, VisitController.disconfirm);
 
 export default router;

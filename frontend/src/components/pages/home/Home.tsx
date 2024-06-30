@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react";
-import { Context } from "../../../context/UserContext";
+import { Context } from "../../../context/functionsContext";
 
 import ImgRounded from "../../layout/ImgRounded/ImgRounded";
 import petFoto from "../../../assets/img/logo.png";
@@ -54,17 +54,17 @@ function Home() {
           }
           const image = petsImage.find((img) => img.petId === pet.id);
           return (
-            <li>
+            <li key={pet.id}>
               {image ? (
                 <ImgRounded src={image.src} alt={pet.name} width="px10" />
               ) : (
                 <ImgRounded src={petFoto} alt={pet.name} width="px10" />
               )}
-              <span>
+              <span className={styles.main_card_pt}>
                 <h2>{pet.name}</h2>
-                <button>
-                  <Link to={`/pet/${pet.id}`}>Saber mais</Link>
-                </button>
+                <Link to={`/pet/${pet.id}`}>
+                  <button>Saber mais</button>
+                </Link>
               </span>
             </li>
           );

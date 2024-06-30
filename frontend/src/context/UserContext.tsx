@@ -1,49 +1,37 @@
-import { ReactNode, createContext } from "react";
+import React, { createContext, useContext, useState, ReactNode } from 'react';
 
-import useAuth from "../hooks/useAuth";
-
-interface AuthContextType {
-  register: (user: object) => Promise<void>;
-  login: (user: object) => Promise<void>;
-  logout: () => void;
+interface User {
+  id?: string;
+  name?: string;
+  phone?: string;
+  image?: string;
+  email?: string;
+  password?: string;
+  imagePreview?: File;
+  [key: string]: any; //
 }
 
-const Context = createContext<AuthContextType | any>(undefined);
-
-interface UserProviderProps {
-  children: ReactNode;
+interface UserContextType {
+  userLogged: User;
+  setUserLogged: (userLogged: User) => void;
 }
 
-function UserProvider({ children }: UserProviderProps) {
-  const {
-    register,
-    authenticated,
-    login,
-    logout,
-    getUser,
-    getAllPets,
-    getPet,
-    updateUser,
-    getPetByUser,
-  } = useAuth();
+const UserContext = createContext<UserContextType | undefined>(undefined);
+
+export const useUser = () => {
+  const context = useContext(UserContext);
+  if (!context) {
+    throw new Error('useUser must be used within a UserProvider');
+  }
+  return context;
+};
+
+export const UserProvider = ({ children }: { children: ReactNode }) => {
+  const [userLogged, setUserLogged] = useState<User>({});
 
   return (
-    <Context.Provider
-      value={{
-        register,
-        authenticated,
-        login,
-        logout,
-        getUser,
-        getAllPets,
-        getPet,
-        updateUser,
-        getPetByUser,
-      }}
-    >
+    <UserContext.Provider value={{ userLogged, setUserLogged }}>
       {children}
-    </Context.Provider>
+    </UserContext.Provider>
   );
-}
-
-export { Context, UserProvider };
+};

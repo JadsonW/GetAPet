@@ -11,5 +11,5 @@ const checkToken_1 = __importDefault(require("../helpers/checkToken"));
 const router = (0, express_1.Router)();
 router.post("/create/:petid", checkToken_1.default, RequestVisitController_1.default.createReqtVisit);
 router.delete('/delete/:id', checkToken_1.default, RequestVisitController_1.default.deleteReqtVisit);
-router.get("/allReqs", checkToken_1.default, RequestVisitController_1.default.getAllReqVisit);
+router.get("/allReqs/:id", checkToken_1.default, RequestVisitController_1.default.getAllReqVisitById);
 exports.default = router;

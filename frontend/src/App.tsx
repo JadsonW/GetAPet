@@ -12,29 +12,31 @@ import Footer from "./components/layout/Footer/Footer";
 import Container from "./components/layout/Container/Container";
 import Message from "./components/layout/Message/Message";
 import Profile from "./components/pages/User/Profile/Profile";
-import MyPets from "./components/pages/User/MyPets";
 
 //Context
+import { FunctionsProvider } from "./context/functionsContext";
 import { UserProvider } from "./context/UserContext";
+
 import PetProfile from "./components/pages/Pet/PetProfile";
 
 function App() {
   return (
     <Router>
       <UserProvider>
-        <Navbar />
-        <Message />
-        <Container>
-          <Routes>
-            <Route path="/pet/:id" element={<PetProfile />} />
-            <Route path="/user/mypets" element={<MyPets />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/create" element={<Register />} />
-            <Route path="/" element={<Home />} />
-          </Routes>
-        </Container>
-        <Footer />
+        <FunctionsProvider>
+          <Navbar />
+          <Message />
+          <Container>
+            <Routes>
+              <Route path="/pet/:id" element={<PetProfile />} />
+              <Route path="/profile/:id" element={<Profile />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/create" element={<Register />} />
+              <Route path="/" element={<Home />} />
+            </Routes>
+          </Container>
+          <Footer />
+        </FunctionsProvider>
       </UserProvider>
     </Router>
   );

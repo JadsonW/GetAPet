@@ -14,6 +14,6 @@ router.post(
   RequestVisitController.createReqtVisit
 );
 router.delete('/delete/:id', checkToken, RequestVisitController.deleteReqtVisit)
-router.get("/allReqs", checkToken, RequestVisitController.getAllReqVisit)
+router.get("/allReqs/:id", checkToken, RequestVisitController.getAllReqVisitById)
 
 export default router;

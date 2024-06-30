@@ -6,7 +6,7 @@ import Input from "../../form/Input/Input";
 import styles from "../../form/Form.module.css";
 
 //context
-import { Context } from "../../../context/UserContext";
+import { Context } from "../../../context/functionsContext";
 
 function Register() {
   const [user, setUser] = useState<Object>({});
@@ -18,7 +18,7 @@ function Register() {
 
   function handleSubmit(e: any) {
     e.preventDefault();
-    register(user)
+    register(user);
   }
 
   return (

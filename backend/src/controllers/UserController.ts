@@ -81,7 +81,7 @@ class UserController {
 
     user.password;
 
-    return res.status(200).json({ user });
+    return res.status(200).json(user);
   }
 
   public async updatedUser(req: Request, res: Response) {
@@ -203,7 +203,6 @@ class UserController {
     } else {
       currentUser = null;
     }
-
     return res.status(200).send(currentUser);
   }
 }

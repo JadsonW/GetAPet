@@ -64,27 +64,20 @@ class RequestVisitController {
             return res.status(200).json({ message: "Solicitação deletada!" });
         });
     }
-    getAllReqVisit(req, res) {
+    getAllReqVisitById(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             const token = yield (0, getToken_1.default)(req, res);
             const user = yield (0, getUserByToken_1.default)(token, res);
+            const id = req.params.id;
             if (!user) {
                 return;
             }
             //buscando todas as requisições de visitas
-            const reqs = yield RequestVisit_1.default.findAll();
+            const reqs = yield RequestVisit_1.default.findAll({ where: { petId: id } });
             if (!reqs) {
                 return res.json({ message: "Nenhuma solicitação de adoção encontrada" });
             }
-            let reqsOwner = [];
-            //verificando se existe alguma visita para o usuario logado
-            for (const req of reqs) {
-                const pet = yield Pet_1.default.findOne({ where: { id: req.petId } });
-                if (pet && pet.userId === user.id) {
-                    reqsOwner.push(req);
-                }
-            }
-            return res.status(200).json({ reqsOwner });
+            return res.status(200).json({ reqs });
         });
     }
 }

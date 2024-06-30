@@ -1,9 +1,7 @@
-import { Context } from "../../../context/UserContext";
+import { Context } from "../../../context/functionsContext";
 import { Link } from "react-router-dom";
 
-import api from "../../../utils/api";
-
-import { useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect } from "react";
 
 import styles from "./Navbar.module.css";
 
@@ -11,20 +9,24 @@ import Logo from "../../../assets/img/logo.png";
 import UserFoto from "../../../assets/img/user.png";
 
 import ImgRounded from "../ImgRounded/ImgRounded";
-
-interface User {
-  name: string;
-  image: any;
-}
+import { useUser } from "../../../context/UserContext";
 
 function Navbar() {
   const { authenticated, logout, getUser } = useContext(Context);
-  const [user, setUser] = useState<User | null>(null);
-  useEffect(() => {
-    getUser().then((response: any) => {
-      setUser(response);
+  const { userLogged, setUserLogged } = useUser();
+
+  const fetchUser = useCallback(async () => {
+    await getUser().then((response: any) => {
+      setUserLogged(response);
     });
-  }, [getUser]);
+  }, [getUser, setUserLogged])
+
+  useEffect(() => {
+    fetchUser()
+  }, [fetchUser]);
+
+  const imageSrc = userLogged && userLogged.image ? userLogged.image : UserFoto;
+
   return (
     <nav className={styles.navbar}>
       <div className={styles.navbar_logo}>
@@ -37,17 +39,18 @@ function Navbar() {
         </li>
         {authenticated ? (
           <>
-        <li>
-          <Link to="/user/mypets">Meus pets</Link>
-        </li>
             <div className={styles.perfil}>
-              {user?.image ? (
-                <ImgRounded src={user.image} alt={user.name} width="px1" />
-              ) : (
-                <ImgRounded src={UserFoto} alt={user?.name} width="px1" />
-              )}
+              <ImgRounded
+                 src={
+                  userLogged && userLogged.imagePreview
+                    ? URL.createObjectURL(userLogged.imagePreview)
+                    : imageSrc
+                }
+                alt={userLogged?.name}
+                width="px1"
+              />
               <div>
-                <Link to={"/profile"}>Meu Perfil</Link>
+                <Link to={`/profile/${userLogged?.id}`}>Meu Perfil</Link>
                 <p onClick={logout}>Sair</p>
               </div>
             </div>

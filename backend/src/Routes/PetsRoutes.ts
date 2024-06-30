@@ -17,7 +17,7 @@ router.post(
   imageUpload.array("images"),
   PetController.create
 );
-router.patch("/conclude", checkToken, PetController.adoptPet);
+router.patch("/conclude/:petId", checkToken, PetController.adoptPet);
 router.get("/:id", PetController.getPetById)
 router.delete("/remove/:id", checkToken, PetController.remove);
 router.patch(

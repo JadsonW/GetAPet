@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const sequelize_1 = require("sequelize");
 const conn_1 = __importDefault(require("../conn/conn"));
 const User_1 = __importDefault(require("./User"));
+//Adicionar o tipo do pet
 class Pet extends sequelize_1.Model {
 }
 Pet.init({
@@ -27,6 +28,10 @@ Pet.init({
         allowNull: false,
     },
     color: {
+        type: sequelize_1.DataTypes.STRING,
+        allowNull: false,
+    },
+    type: {
         type: sequelize_1.DataTypes.STRING,
         allowNull: false,
     },

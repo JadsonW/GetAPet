@@ -84,7 +84,10 @@ class VisitController {
 
       const visitCreate = await Visit.create(visitData);
       await reqVisit.destroy();
-      return res.status(200).json({ message: "Visita marcada", visitCreate });
+      return res.status(200).json({
+        message: `Visita agendada com ${adopter.name} .`,
+        visitCreate,
+      });
     } catch (error: any) {
       if (error.name === "ValidationError") {
         return res.status(422).json({ message: error.message });
@@ -99,7 +102,8 @@ class VisitController {
   public async disconfirm(req: Request, res: Response) {
     try {
       //id da visita
-      const id = req.params.id;
+      const id = req.params.idVisit;
+      console.log('chegou')
 
       const visit = await Visit.findByPk(id);
 
@@ -141,8 +145,10 @@ class VisitController {
 
   public async getVisitByUser(req: Request, res: Response) {
     try {
-      const token = await getToken(req, res);
-      const user = await getUserByToken(token, res);
+      let visits;
+      const id = req.params.id;
+
+      const user = await User.findByPk(id);
 
       if (!user) {
         return res.status(422).json({ message: "Faça login!" });
@@ -152,18 +158,30 @@ class VisitController {
       const visitsAdopter = await Visit.findAll({
         where: { adopterId: user.id },
       });
-      console.log("rrrr", visitsAdopter);
-      console.log("eee", visitsOwner);
-
-      const visits: Array<Object> = [];
 
       if (visitsOwner) {
-        visits.push(visitsOwner);
+        visits = visitsOwner;
+      } else if (visitsAdopter) {
+        visits = visitsAdopter;
+      } else if (!visitsAdopter && !visitsOwner) {
+        return res.json({
+          message: "Voce não possui visitas agendadas!",
+        });
       }
-      if (visitsAdopter) {
-        visits.push(visitsAdopter);
-      }
-      if (!visitsAdopter && !visitsOwner) {
+
+      return res.status(200).json({ visits });
+    } catch (error) {
+      console.log("Erro na busca as visitas! ", error);
+    }
+  }
+
+  public async getVisitByPet(req: Request, res: Response) {
+    try {
+      const id = req.params.id;
+
+      const visits = await Visit.findAll({ where: { petId: id } });
+
+      if (!visits ) {
         return res.json({
           message: "Voce não possui visitas agendadas!",
         });
